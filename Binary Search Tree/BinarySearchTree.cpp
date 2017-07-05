@@ -1,163 +1,245 @@
 #include <iostream>
+#include <cstdlib>
 
 using namespace std;
 
-struct BSTNode
-{
-    int data;
-    BSTNode* left;
-    BSTNode* right;
+template<typename dataType>
+class Node {
+public:
+    dataType data;
+    Node* left;
+    Node* right;
+    Node* parent;
+
+    Node() {
+        data = 0;
+        left = NULL;
+        right = NULL;
+        parent = NULL;
+    }
+
+    Node(const dataType &data) {
+        this->data = data;
+        left = NULL;
+        right = NULL;
+        parent = NULL;
+    }
 };
 
-BSTNode* root = NULL;
+template<typename dataType>
+class BST {
+private:
+    Node<dataType>* root;
 
-void preOrder(BSTNode *root)
-{
-    if(root == NULL)
-    {
-        return;
-    }
-    else
-    {
-        cout << root->data << " ";
-        preOrder(root->left);
-        preOrder(root->right);
-    }
-}
-void postOrder(BSTNode *root)
-{
-    if(root == NULL)
-    {
-        return;
-    }
-    else
-    {
-        postOrder(root->left);
-        postOrder(root->right);
-        cout << root->data << " ";
-    }
-}
-
-void inOrder(BSTNode *root)
-{
-    if (root == NULL)
-    {
-        return;
-    }
-    else
-    {
-        inOrder(root->left);
-        cout << root->data << " ";
-        inOrder(root->right);
+    void inOrder(Node<dataType> *root) {
+        if (root == NULL) {
+            return;
+        } else {
+            inOrder(root->left);
+            cout << root->data << " ";
+            inOrder(root->right);
+        }
     }
 
-}
-
-int findSmallestBST(BSTNode *root)
-{
-    if(root->left == NULL)
-    {
-        return root->data;
-    }
-    else
-        return findSmallestBST(root->left);
-
-}
-int findLargestBST(BSTNode* root)
-{
-    if(root->right == NULL)
-    {
-        return root->data;
-    }
-    else
-    {
-        return findLargestBST(root);
-    }
-}
-
-int lookFor(BSTNode* root, int number)
-{
-    if(root == NULL)
-    {
-        return 0;
-    }
-    else if(number < root->data)
-    {
-        lookFor(root->left, number);
-    }
-    else if(number > root->data)
-    {
-        lookFor(root->right, number);
-    }
-    else if(number == root->data)
-    {
-        return 1;
+    void postOrder(Node<dataType> *root) {
+        if (root == NULL) {
+            return;
+        } else {
+            postOrder(root->left);
+            postOrder(root->right);
+            cout << root->data << " ";
+        }
     }
 
-}
-BSTNode* newNode(int number)
-{
-    BSTNode* newNode = new BSTNode();
-    newNode->data = number;
-    newNode->left = NULL;
-    newNode->right = NULL;
-}
-BSTNode* insert(BSTNode* root, int number)
-{
-    if(root == NULL)
-    {
-        root = newNode(number);
-    }
-    else if(number < root->data)
-    {
-        root->left = insert(root->left, number);
-    }
-    else if(number > root->data)
-    {
-        root->right = insert(root->right, number);
+    void preOrder(Node<dataType> *root) {
+        if (root == NULL) {
+            return;
+        } else {
+            cout << root->data << " ";
+            preOrder(root->left);
+            preOrder(root->right);
+        }
     }
 
-}
-BSTNode* searchNode(BSTNode* root, int number)
-{
-    if(root->data == number || root == NULL)
-    {
+    dataType minimumRecursive(Node<dataType> *root) {
+        if (root->left == NULL) {
+            return root->data;
+        } else {
+            return minimumRecursive(root->left);
+        }
+    }
+
+    dataType maximumRecursive(Node<dataType> *root) {
+        if (root->right == NULL) {
+            return root->data;
+        } else {
+            return maximumRecursive(root->right);
+        }
+    }
+
+    bool search(Node<dataType> *traversingPointer, const dataType &number) {
+        if (traversingPointer == NULL) {
+            return 0;
+        } else if (number == traversingPointer->data) {
+            return 1;
+        } else if (number < traversingPointer->data) {
+            return search(traversingPointer->left, number);
+        } else {
+            return search(traversingPointer->right, number);
+        }
+    }
+
+    Node<dataType> *searchNode(Node<dataType> *traversingPointer, const dataType &number) {
+        if (traversingPointer == NULL) {
+            return NULL;
+        } else if (traversingPointer->data == number) {
+            return traversingPointer;
+        } else if (number < traversingPointer->data) {
+            searchNode(traversingPointer->left, number);
+        } else if (number >= traversingPointer->data) {
+            searchNode(traversingPointer->right, number);
+        }
+    }
+public:
+
+    BST() {
+        root = NULL;
+    }
+
+    Node<dataType>* getRoot() {
         return root;
     }
-    else if(number < root->data)
-    {
-        searchNode(root->left, number);
+
+    void insert(const dataType &number) {
+        Node<dataType>* parentNode = NULL;
+        Node<dataType>* currentNode = root;
+        Node<dataType>* newNode = new Node<dataType>(number);
+        while (currentNode != NULL) {
+            parentNode = currentNode;
+            if (number < currentNode->data) {
+                currentNode = currentNode->left;
+            } else {
+                currentNode = currentNode->right;
+            }
+        }
+        newNode->parent = parentNode;
+        //if the BST is empty
+        if (parentNode == NULL) {
+            root = newNode;
+        } else if (number < parentNode->data) {
+            parentNode->left = newNode;
+        } else {
+            parentNode->right = newNode;
+        }
     }
-    else if(number > root->data)
-    {
-        searchNode(root->right, number);
+
+    void inOrder() {
+        inOrder(root);
+        cout << endl;
     }
 
+    void postOrder() {
+        postOrder(root);
+        cout << endl;
+    }
 
+    void preOrder() {
+        preOrder(root);
+        cout << endl;
+    }
 
-}
-int findSuccessor(BSTNode* root, int number){
-root = searchNode(root, number);
-int successor = findSmallestBST(root->right);
-return successor;
-}
-int main()
-{
-    BSTNode* root = new BSTNode();
-    root->left = NULL;
-    root->right = NULL;
-    root->data = 5;
-    int x = findSmallestBST(root);
-    cout << x << endl;
-    int found = lookFor(root, 4);
-    cout << "Found :"<< found << endl;
-    root = insert(root, 1);
-    root = insert(root, 2);
-    inOrder(root);
-    int y = findLargestBST(root);
-    cout << y << endl;
-    int z = findSuccessor(root, 2);
-    cout << z << endl;
+    dataType minimumIterative() {
+        Node<dataType> *traversingPointer = root;
+        while (traversingPointer->left != NULL) {
+            traversingPointer = traversingPointer->left;
+        }
+        return traversingPointer->data;
+    }
 
+    dataType maximumIterative() {
+        Node<dataType> *traversingPointer = root;
+        while (traversingPointer->right != NULL) {
+            traversingPointer = traversingPointer->right;
+        }
+        return traversingPointer->data;
+    }
+
+    dataType minimumRecursive() {
+        return minimumRecursive(root);
+    }
+
+    dataType maximumRecursive() {
+        return maximumRecursive(root);
+    }
+
+    bool search(const dataType &number) {
+        return search(root, number);
+    }
+
+    Node<dataType> *searchNode(const dataType &number) {
+        return searchNode(root, number);
+    }
+
+    dataType successorOf(const dataType &number) {
+        Node<dataType> *node = searchNode(root, number);
+        dataType successor;
+        if (node->right != NULL) {
+            successor = minimumRecursive(node->right);
+        } else {
+            Node<dataType>* parent = node->parent;
+            while ((parent != NULL) && (node == parent->right)) {
+                node = parent;
+                parent = parent->parent;
+            }
+            if (parent == NULL) {
+                return -9999;
+            }
+            successor = parent->data;
+        }
+        return successor;
+    }
+
+    void transplant(Node<dataType>* node, Node<dataType>* child) {
+        Node<dataType>* parent = node->parent;
+        if (parent == NULL) {
+            root = child;
+        } else if (parent->right == node) {
+            parent->right = child;
+
+        } else if (parent->left == node) {
+            parent->left = child;
+        }
+        if (child != NULL) {
+            child->parent = node->parent;
+        }
+    }
+
+    void deleteNode(const dataType &number) {
+        Node<dataType>* node = searchNode(root, number);
+        if (node == NULL) {
+            cout << "Node doesn't exist." << endl;
+            return;
+        }
+        if (node->left == NULL) {
+            transplant(node, node->right);
+        } else if (node->right == NULL) {
+            transplant(node, node->left);
+        } else {
+            Node<dataType>* successor = searchNode(minimumRecursive(node->right));
+            if(successor->parent != node){
+                transplant(successor, successor->right);
+                successor->right = node->right;
+                (successor->right)->parent = successor;
+            }
+            transplant(node, successor);
+            successor->left = node->left;
+            (node->left)->parent = successor;
+        }
+        delete node;
+    }
+};
+
+int main() 
     return 0;
 }
+
